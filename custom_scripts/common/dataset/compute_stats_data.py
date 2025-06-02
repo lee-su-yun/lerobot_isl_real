@@ -22,29 +22,26 @@ for chunk_id in range(10):
 full_df = pd.concat(dfs, ignore_index=True)
 
 # 통계 계산
-for col in columns:
-    if col in vector_columns:
-        try:
-            # 먼저 리스트를 배열로 변환
-            array_list = [np.array(v, dtype=np.float32) for v in full_df[col].tolist()]
-            arr = np.stack(array_list)  # shape (N, D)
+for col in vector_columns:
+    try:
+        # 각 element가 list인지 확인하고, list of list면 flatten
+        array_list = []
+        for v in full_df[col]:
+            if isinstance(v[0], list):
+                array_list.append(np.array(v[0], dtype=np.float32))  # list of list
+            else:
+                array_list.append(np.array(v, dtype=np.float32))     # flat list
 
-            stats[col] = {
-                "mean": np.mean(arr, axis=0).tolist(),
-                "std": np.std(arr, axis=0).tolist(),
-                "max": np.max(arr, axis=0).tolist(),
-                "min": np.min(arr, axis=0).tolist(),
-            }
-        except Exception as e:
-            print(f"Error processing {col}: {e}")
-    else:
-        series = full_df[col].astype(float)
+        arr = np.stack(array_list)
+
         stats[col] = {
-            "mean": float(series.mean()),
-            "std": float(series.std()),
-            "max": float(series.max()),
-            "min": float(series.min()),
+            "mean": np.mean(arr, axis=0).tolist(),
+            "std": np.std(arr, axis=0).tolist(),
+            "max": np.max(arr, axis=0).tolist(),
+            "min": np.min(arr, axis=0).tolist(),
         }
+    except Exception as e:
+        print(f"Error processing {col}: {e}")
 
 # 결과 출력
 print(json.dumps(stats, indent=2))
