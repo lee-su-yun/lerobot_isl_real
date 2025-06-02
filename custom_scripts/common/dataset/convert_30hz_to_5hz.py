@@ -35,42 +35,42 @@ def convert_30hz_to_5hz(index):
     # old_index = index + 120
     # old_chunk_id = chunk_id + 6
 
-    ######
-    # parquet_file_path = f"/data/piper_subtask_data/pick/train/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
-    # parquet_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
-    #
-    # exo_video_file_path = f"/data/piper_subtask_data/pick/train/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
-    # exo_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    #####
+    parquet_file_path = f"/data/piper_subtask_data/pick/train/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
+    parquet_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
+
+    exo_video_file_path = f"/data/piper_subtask_data/pick/train/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    exo_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
 
     wrist_video_file_path = f"/data/piper_subtask_data/pick/train/videos/chunk-{index//20:03d}/observation.images.wrist/episode_{index:06d}.mp4"
     wrist_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/videos/chunk-{index//20:03d}/observation.images.wrist/episode_{index:06d}.mp4"
 
-    # table_video_file_path = f"/data/piper_subtask_data/pick/train/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
-    # table_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
-    #
-    # dataset = load_dataset("parquet", data_files=parquet_file_path)['train']
-    # features = Features({
-    #     "action": Sequence(Value("int64"), length=7),
-    #     "observation.state": Sequence(Value("int64"), length=7),
-    #     "timestamp": Value("float32"),
-    #     "frame_index": Value("int64"),
-    #     "episode_index": Value("int64"),
-    #     "index": Value("int64"),
-    #     "task_index": Value("int64")
-    # })
-    #
-    # dataset = dataset.to_dict()
-    #
-    # dataset['action'] = [elem[0] for elem in dataset['action']]
-    # dataset['observation.state'] = [elem[0] for elem in dataset['observation.state']]
-    #
-    # dataset = Dataset.from_dict(dataset, features=features)
-    # sampled_dataset = dataset.select(range(0, len(dataset), 6))
-    # sampled_dataset.to_parquet(parquet_file_path_des)
+    table_video_file_path = f"/data/piper_subtask_data/pick/train/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
+    table_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz_real/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
 
-    # cvt_vid(exo_video_file_path, exo_video_file_path_des)
+    dataset = load_dataset("parquet", data_files=parquet_file_path)['train']
+    features = Features({
+        "action": Sequence(Value("int64"), length=7),
+        "observation.state": Sequence(Value("int64"), length=7),
+        "timestamp": Value("float32"),
+        "frame_index": Value("int64"),
+        "episode_index": Value("int64"),
+        "index": Value("int64"),
+        "task_index": Value("int64")
+    })
+
+    dataset = dataset.to_dict()
+
+    dataset['action'] = [elem[0] for elem in dataset['action']]
+    dataset['observation.state'] = [elem[0] for elem in dataset['observation.state']]
+
+    dataset = Dataset.from_dict(dataset, features=features)
+    sampled_dataset = dataset.select(range(0, len(dataset), 6))
+    sampled_dataset.to_parquet(parquet_file_path_des)
+
+    cvt_vid(exo_video_file_path, exo_video_file_path_des)
     cvt_vid(wrist_video_file_path, wrist_video_file_path_des)
-    # cvt_vid(table_video_file_path, table_video_file_path_des)
+    cvt_vid(table_video_file_path, table_video_file_path_des)
 
 
 if __name__ == "__main__":
