@@ -10,18 +10,22 @@ base_path = "/data/piper_subtask_data/pick/train_5hz/data"  # 여기에 chunk000
 all_data = []
 
 # chunk000 ~ chunk009 순회
-for i in range(10):
-    chunk_dir = os.path.join(base_path, f'chunk{i:03d}')
+base_dir = "/data/piper_subtask_data/pick/train/data"
+columns = ['action', 'observation.state', 'timestamp', 'frame_index', 'episode_index', 'task_index', 'index']
+vector_columns = ['action', 'observation.state']
+stats = {col: {} for col in columns}
+dfs = []
 
-    # 해당 chunk 안의 모든 parquet 파일 경로 가져오기
-    parquet_files = sorted(glob(os.path.join(chunk_dir, '*.parquet')))
+# 모든 parquet 파일 읽기
+for chunk_id in range(10):
+    chunk_path = os.path.join(base_dir, f"chunk-{chunk_id:03d}")
+    for ep_id in range(20):
+        file_path = os.path.join(chunk_path, f"episode_{chunk_id * 20 + ep_id:06d}.parquet")
+        df = pd.read_parquet(file_path)
+        dfs.append(df)
 
-    for file in parquet_files:
-        df = pd.read_parquet(file)
-        all_data.append(df)
-
-# 모든 데이터를 하나의 DataFrame으로 병합
-merged_df = pd.concat(all_data, ignore_index=True)
+# 전체 결합
+full_df = pd.concat(dfs, ignore_index=True)
 
 # 원하는 컬럼
 target_columns = ['action', 'observation.state', 'timestamp', 'frame_index', 'episode_index', 'task_index', 'index']
@@ -29,7 +33,7 @@ target_columns = ['action', 'observation.state', 'timestamp', 'frame_index', 'ep
 # 통계 계산
 stats = {}
 for col in target_columns:
-    col_data = merged_df[col]
+    col_data = full_df[col]
 
     # 리스트나 배열이면 numpy 변환
     if isinstance(col_data.iloc[0], (list, np.ndarray)):
