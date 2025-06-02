@@ -30,17 +30,23 @@ def cvt_vid(origin, output):
 
 
 def convert_30hz_to_5hz(index):
-    parquet_file_path = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/data/chunk-{index//50:03d}/episode_{index:06d}.parquet"
-    parquet_file_path_des = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/data/chunk-{index//50:03d}/episode_{index:06d}.parquet"
+    ######
+    # chunk_id = index//20
+    # old_index = index + 120
+    # old_chunk_id = chunk_id + 6
 
-    exo_video_file_path = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50+2:03d}/observation.images.exo/episode_{index+120:06d}.mp4"
-    exo_video_file_path_des = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    ######
+    parquet_file_path = f"/data/piper_subtask_data/pick/train_5hz/train/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
+    parquet_file_path_des = f"/data/piper_subtask_data/pick/train_5hz/train/data/chunk-{index//20:03d}/episode_{index:06d}.parquet"
 
-    wrist_video_file_path = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50+2:03d}/observation.images.wrist/episode_{index+120:06d}.mp4"
-    wrist_video_file_path_des = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50:03d}/observation.images.wrist/episode_{index:06d}.mp4"
+    exo_video_file_path = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    exo_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.exo/episode_{index:06d}.mp4"
 
-    table_video_file_path = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50+2:03d}/observation.images.table/episode_{index+120:06d}.mp4"
-    table_video_file_path_des = f"/data/piper_lerobot/lerobot_aligncups_5hz/test/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
+    wrist_video_file_path = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.wrist/episode_{index:06d}.mp4"
+    wrist_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.wrist/episode_{index:06d}.mp4"
+
+    table_video_file_path = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
+    table_video_file_path_des = f"/data/piper_subtask_data/pick/train_5hz/train/videos/chunk-{index//20:03d}/observation.images.table/episode_{index:06d}.mp4"
 
     dataset = load_dataset("parquet", data_files=parquet_file_path)['train']
     features = Features({
@@ -68,5 +74,6 @@ def convert_30hz_to_5hz(index):
 
 
 if __name__ == "__main__":
-    for i in tqdm(range(5)):
+    #for i in tqdm(range(5)):
+    for i in tqdm(range(200)):
         convert_30hz_to_5hz(i)
