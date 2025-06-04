@@ -148,8 +148,8 @@ def load_training_state(
         tuple[int, Optimizer, LRScheduler | None]: training step, optimizer and scheduler with their
             state_dict loaded.
     """
-    #training_state_dir = checkpoint_dir / TRAINING_STATE_DIR
-    training_state_dir = Path('/result/piper_subtask/pi0_resume/checkpoints/last/training_state')
+    training_state_dir = checkpoint_dir / TRAINING_STATE_DIR
+    #training_state_dir = Path('/result/piper_subtask/pi0_resume/checkpoints/last/training_state')
     if not training_state_dir.is_dir():
         raise NotADirectoryError(training_state_dir)
 
