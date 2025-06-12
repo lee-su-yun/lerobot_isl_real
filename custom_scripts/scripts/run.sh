@@ -7,11 +7,11 @@ CUDA_VISIBLE_DEVICES=${DEVICES} \
     ./train_pi0_ddp.py \
     --policy.path=/ckpt/pi0 \
     --use_ddp=true \
-    --dataset.repo_id=/data/piper_lerobot/lerobot_aligncups_5hz/train \
-    --dataset.root=/data/piper_lerobot/lerobot_aligncups_5hz/train \
+    --dataset.repo_id=/data/piper_subtask_data/pick/train_5hz_real \
+    --dataset.root=/data/piper_subtask_data/pick/train_5hz_real \
     --wandb.enable=true \
-    --output_dir=/result/pi0_ddp_20250609_piper_5hz_aligncups \
-    --job_name=pi0_ddp_piper_aligncups \
+    --output_dir=/result/piper_subtask/pi0_test \
+    --job_name=pi0_ddp_piper_pick \
     --wandb.disable_artifact=true \
     --batch_size=6 \
     --num_workers=16 \
