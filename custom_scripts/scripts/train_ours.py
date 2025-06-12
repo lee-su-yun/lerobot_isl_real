@@ -108,8 +108,8 @@ def update_policy(
 @parser.wrap()
 def train(cfg: TrainPipelineConfig):
     cfg.validate()
-    cfg.policy.n_action_steps = 5
-    cfg.policy.chunk_size = 5
+   # cfg.policy.n_action_steps = 5
+   # cfg.policy.chunk_size = 5
     logging.info(pformat(cfg.to_dict()))
 
     if cfg.wandb.enable and cfg.wandb.project:
