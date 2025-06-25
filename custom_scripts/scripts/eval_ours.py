@@ -164,7 +164,8 @@ def eval_main(cfg: EvalOursPipelineConfig):
             #     batch,
             #     use_amp = cfg.policy.use_amp,
             # )
-
+            batch["action"] = batch["action"].squeeze(2)
+            batch["observation.state"] = batch["observation.state"].squeeze(1)
             # Plot Trajectory
             action_pred = policy.select_action(batch).squeeze()
             action_ans =  batch['action'].squeeze()[0]

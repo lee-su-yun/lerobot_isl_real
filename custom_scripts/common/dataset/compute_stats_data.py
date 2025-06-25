@@ -4,7 +4,7 @@ from glob import glob
 import numpy as np
 
 # 기준 경로 설정
-base_dir = "/data/piper_subtask_data/pick/train_5hz/data"  # 여기에 chunk000~chunk009이 있는 상위 디렉토리 경로를 입력하세요
+base_dir = "/home/sylee/codes/pick_grape/data"  # 여기에 chunk000~chunk009이 있는 상위 디렉토리 경로를 입력하세요
 
 # 누적 데이터프레임 리스트
 all_data = []

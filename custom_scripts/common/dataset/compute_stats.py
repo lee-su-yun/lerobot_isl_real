@@ -65,7 +65,7 @@ def get_stats(base_dir,camera):
 
 
 if __name__=='__main__':
-    base_dir = "/data/piper_subtask_data/pick/train_5hz_real/videos"
+    base_dir = "/home/codes/pick_grape/videos"
     cameras = ["table", "wrist"]
 
     for camera in cameras:
