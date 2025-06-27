@@ -35,7 +35,7 @@ if __name__ == "__main__":
     total_frames, offset = 0, 0
     episodes_jsonl_path = "/data/piper_grape0626/lerobot_5hz"
     for i in tqdm(range(600)):
-        #make_episode_jsonl(i, episodes_jsonl_path)
+        make_episode_jsonl(i, episodes_jsonl_path)
         length = add_index_to_parquet(i, offset)
         offset += length
     print(f'total_frame is : {offset}')
