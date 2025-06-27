@@ -21,12 +21,21 @@ def make_episode_jsonl(index, output_dir):
         print(f"Saved episode {index} to {output_path}")
     except Exception as e:
         print(f"Failed to process index {index}: {e}")
-    return length
+
+def add_index_to_parquet(index, running_offset):
+    parquet_file_path = f"/data/piper_grape0626/lerobot_5hz/data/chunk-{index // 50:03d}/episode_{index:06d}.parquet"
+    df = pd.read_parquet(parquet_file_path)
+    df["index"] = range(running_offset, running_offset + len(df))
+    df.to_parquet(parquet_file_path, index=False)
+    return len(df)  # return length to update running_offset
+
 
 if __name__ == "__main__":
     #for i in tqdm(range(5)):
-    total_frames = 0
+    total_frames, offset = 0, 0
     episodes_jsonl_path = "/data/piper_grape0626/lerobot_5hz"
     for i in tqdm(range(600)):
-        total_frames += make_episode_jsonl(i, episodes_jsonl_path)
-    print(f'total_frame is : {total_frames}')
+        #make_episode_jsonl(i, episodes_jsonl_path)
+        length = add_index_to_parquet(i, offset)
+        offset += length
+    print(f'total_frame is : {offset}')
