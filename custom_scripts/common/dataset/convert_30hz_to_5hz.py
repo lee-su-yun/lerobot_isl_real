@@ -2,6 +2,7 @@ import pandas as pd
 from tqdm import tqdm
 import cv2
 from datasets import load_dataset, Dataset, Features, Sequence, Value
+import os
 
 def cvt_vid(origin, output):
     cap = cv2.VideoCapture(origin)
@@ -47,6 +48,11 @@ def convert_30hz_to_5hz(index):
 
     table_video_file_path = f"/data/piper_grape0626/lerobot/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
     table_video_file_path_des = f"/data/piper_grape0626/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
+
+    os.makedirs(os.path.dirname(parquet_file_path_des), exist_ok=True)
+    os.makedirs(os.path.dirname(exo_video_file_path_des), exist_ok=True)
+    os.makedirs(os.path.dirname(wrist_video_file_path_des), exist_ok=True)
+    os.makedirs(os.path.dirname(table_video_file_path_des), exist_ok=True)
 
     dataset = load_dataset("parquet", data_files=parquet_file_path)['train']
     features = Features({
