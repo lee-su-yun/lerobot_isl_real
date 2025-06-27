@@ -19,7 +19,7 @@ dfs = []
 for chunk_id in range(12):
     chunk_path = os.path.join(base_dir, f"chunk-{chunk_id:03d}")
     for ep_id in range(50):
-        file_path = os.path.join(chunk_path, f"episode_{chunk_id * 20 + ep_id:06d}.parquet")
+        file_path = os.path.join(chunk_path, f"episode_{chunk_id * 50 + ep_id:06d}.parquet")
         df = pd.read_parquet(file_path)
         dfs.append(df)
 
