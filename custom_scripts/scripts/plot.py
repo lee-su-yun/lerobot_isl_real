@@ -18,7 +18,7 @@ dims = ["x", "y", "z"]
 
 for i, dim in enumerate(dims):
     axes[i].plot(range(len(pd_xyz)), pd_xyz[dim], label=f"{dim} (df: line)", color="blue")
-    axes[i].scatter(range(len(pd2_xyz)), pd2_xyz[dim], label=f"{dim} (df2: dots)", color="red", s=10)
+    axes[i].scatter([j * 6 for j in range(len(pd2_xyz))], pd2_xyz[dim], label=f"{dim} (df2: dots)", color="red", s=10)
     axes[i].set_ylabel(dim)
     axes[i].legend()
     axes[i].grid(True)
