@@ -29,3 +29,5 @@ if __name__ == "__main__":
     episodes_jsonl_path = "/data/piper_grape0626/lerobot_5hz"
     for i in tqdm(range(600)):
         total_frames += make_episode_jsonl(i, episodes_jsonl_path)
+        print(total_frames)
+    print(total_frames)
