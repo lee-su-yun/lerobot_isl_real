@@ -55,7 +55,7 @@ def convert_30hz_to_5hz(index):
         "timestamp": Value("float32"),
         "frame_index": Value("int64"),
         "episode_index": Value("int64"),
-        "index": Value("int64"),
+        #"index": Value("int64"),
         "task_index": Value("int64")
     })
 
