@@ -168,13 +168,13 @@ def eval_main(cfg: EvalOursPipelineConfig):
             # Plot Trajectory
             action_pred = policy.select_action(batch).squeeze()
 
-            # if hasattr(policy.model, "paligemma_with_expert"):
-            #     input_ids = batch.get("observation.language_input_ids")  # adjust key if needed
-            #     if input_ids is not None:
-            #         output_ids = policy.model.paligemma_with_expert.generate_text(input_ids=input_ids)
-            #         from transformers import AutoTokenizer
-            #         tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b")
-            #         print("Language Output:", tokenizer.batch_decode(output_ids, skip_special_tokens=True))
+            if hasattr(policy.model, "paligemma_with_expert"):
+                input_ids = batch.get("observation.language_input_ids")  # adjust key if needed
+                if input_ids is not None:
+                    output_ids = policy.model.paligemma_with_expert.generate_text(input_ids=input_ids)
+                    from transformers import AutoTokenizer
+                    tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b")
+                    print("Language Output:", tokenizer.batch_decode(output_ids, skip_special_tokens=True))
 
 
             action_ans =  batch['action'].squeeze()[0]
