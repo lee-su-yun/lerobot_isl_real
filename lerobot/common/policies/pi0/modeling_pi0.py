@@ -733,11 +733,11 @@ class PI0FlowMatching(nn.Module):
         paligemma_embs = prefix_outputs[0]
 
         # Compute logits and decode
-        logits = self.paligemma_with_expert.paligemma.lm_head(paligemma_embs)
+        logits = self.paligemma_with_expert.paligemma.get_output_embeddings()(paligemma_embs)
         text_output_ids = torch.argmax(logits, dim=-1)
 
         from transformers import AutoTokenizer
-        tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b-pt-224")
+        tokenizer = AutoTokenizer.from_pretrained("/ckpt/paligemma-3b-pt-224")
         decoded_texts = tokenizer.batch_decode(text_output_ids, skip_special_tokens=True)
         print("PaliGemma Generated Text Output:", decoded_texts)
 
