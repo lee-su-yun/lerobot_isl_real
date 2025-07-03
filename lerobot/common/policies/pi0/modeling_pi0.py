@@ -689,30 +689,7 @@ class PI0FlowMatching(nn.Module):
             fill_kv_cache=True,
         )
 
-        #############
-        # from transformers import AutoTokenizer
-        #
-        # prefix_outputs, _ = self.paligemma_with_expert.forward(
-        #     attention_mask=prefix_att_2d_masks,
-        #     position_ids=prefix_position_ids,
-        #     past_key_values=None,
-        #     inputs_embeds=[prefix_embs, None],
-        #     use_cache=False,
-        #     fill_kv_cache=False,
-        # )
-        #
-        # # paligemma의 텍스트 출력 (gemma_expert 말고!)
-        # paligemma_embs = prefix_outputs[0]  # outputs_embeds[0]은 paligemma쪽
-        #
-        # # lm_head로 logits → argmax
-        # logits = self.paligemma_with_expert.paligemma.lm_head(paligemma_embs)
-        # text_output_ids = torch.argmax(logits, dim=-1)
-        #
-        # # tokenizer로 decode
-        # tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b")
-        # decoded_texts = tokenizer.batch_decode(text_output_ids, skip_special_tokens=True)
-        # print("PaliGemma Generated Text Output:", decoded_texts)
-        #############
+
 
         t_observation_forward_pass = log_time()
 
@@ -741,6 +718,29 @@ class PI0FlowMatching(nn.Module):
             "t_observation_forward_pass": t_observation_forward_pass-t_image_encoders,
             "t_action_forward_pass": t_action_forward_pass-t_observation_forward_pass,
         }
+
+        # Compute paligemma language output (optional for logging/debugging)
+        prefix_outputs, _ = self.paligemma_with_expert.forward(
+            attention_mask=prefix_att_2d_masks,
+            position_ids=prefix_position_ids,
+            past_key_values=None,
+            inputs_embeds=[prefix_embs, None],
+            use_cache=False,
+            fill_kv_cache=False,
+        )
+
+        # Extract paligemma output (not gemma expert)
+        paligemma_embs = prefix_outputs[0]
+
+        # Compute logits and decode
+        logits = self.paligemma_with_expert.paligemma.lm_head(paligemma_embs)
+        text_output_ids = torch.argmax(logits, dim=-1)
+
+        from transformers import AutoTokenizer
+        tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b-pt-224")
+        decoded_texts = tokenizer.batch_decode(text_output_ids, skip_special_tokens=True)
+        print("PaliGemma Generated Text Output:", decoded_texts)
+
 
         return x_t
 
