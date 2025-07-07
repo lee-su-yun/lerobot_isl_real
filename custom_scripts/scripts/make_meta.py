@@ -11,7 +11,7 @@ def make_episode_jsonl(index, output_dir):
         df = pd.read_parquet(file_path)
         length = len(df)
         episode = {
-            "episode_index": index,
+            "episode_index": index+600,
             "tasks": ["Pick the grape and put it in the basket."],
             "length": length
         }
@@ -36,6 +36,6 @@ if __name__ == "__main__":
     episodes_jsonl_path = "/data/piper_grape0626/lerobot_5hz"
     for i in tqdm(range(600)):
         make_episode_jsonl(i, episodes_jsonl_path)
-        length = add_index_to_parquet(i, offset)
-        offset += length
-    print(f'total_frame is : {offset}')
+       # length = add_index_to_parquet(i, offset)
+       # offset += length
+    #print(f'total_frame is : {offset}')
