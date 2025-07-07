@@ -383,5 +383,5 @@ def visualize_placement(episode_number):
 # --- 3. Example Usage ---
 # Test with episode 605, which you provided an image for.
 # Expected: Other Object in Area 1 (Cabbage), Grapes in Area 2 (Sub-area 2, Pattern 1)
-visualize_placement(605)
+visualize_placement(606)
 
