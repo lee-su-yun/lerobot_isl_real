@@ -20,22 +20,22 @@ import torch.nn.functional as F
 from pytest import Cache
 from torch import nn
 class SimpleMoE(nn.Module):
-    def __init__(self, input_dim, hidden_dim=512, num_experts=4):
+    def __init__(self, input_dim=1152, output_dim=2048, num_experts=4):
         super().__init__()
         self.experts = nn.ModuleList([
             nn.Sequential(
-                nn.Linear(input_dim, hidden_dim),
-                nn.ReLU(),
-                nn.Linear(hidden_dim, input_dim),
+                nn.Linear(input_dim, input_dim),
+                nn.GELU(),
+                nn.Linear(input_dim, output_dim)
             ) for _ in range(num_experts)
         ])
-        self.gating = nn.Linear(input_dim, num_experts)
+        self.gate = nn.Linear(input_dim, num_experts)
 
     def forward(self, x):
-        gate_scores = F.softmax(self.gating(x), dim=-1)
-        expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=0)
-        expert_outputs = expert_outputs.permute(1, 2, 0, 3)
-        return torch.sum(gate_scores.unsqueeze(-1) * expert_outputs, dim=2)
+        weights = torch.softmax(self.gate(x), dim=-1)
+        expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=-1)
+        output = torch.sum(expert_outputs * weights.unsqueeze(-2), dim=-1)
+        return output
 from transformers import (
     AutoConfig,
     GemmaForCausalLM,
@@ -205,8 +205,12 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         self.image_moe = SimpleMoE(input_dim=input_dim)
         proj = self.paligemma.multi_modal_projector.linear
         for expert in self.image_moe.experts:
+            first_linear = expert[0]
+            nn.init.eye_(first_linear.weight)  # weight = Identity matrix
+            nn.init.zeros_(first_linear.bias)
             expert[-1].weight.data.copy_(proj.weight.data.clone())
             expert[-1].bias.data.copy_(proj.bias.data.clone())
+
 
 
 
