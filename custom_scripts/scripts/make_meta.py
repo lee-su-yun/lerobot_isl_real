@@ -11,7 +11,7 @@ def make_episode_jsonl(index, output_dir):
         df = pd.read_parquet(file_path)
         length = len(df)
         episode = {
-            "episode_index": index,
+            "episode_index": index+600,
             "tasks": ["Pick the grape and put it in the basket."],
             "length": length
         }
