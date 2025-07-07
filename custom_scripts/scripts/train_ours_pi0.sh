@@ -1,10 +1,10 @@
-DEVICES=0,1,2,3
+DEVICES=0,1,2
 TORCH_DISTRIBUTED_BUCKET_CAP_MB=10
 
 CUDA_VISIBLE_DEVICES=${DEVICES} \
   torchrun \
     --master-port 29400 \
-    --nproc_per_node=4 \
+    --nproc_per_node=3 \
     ./train_pi0_ddp.py \
     --policy.path=/ckpt/pi0 \
     --use_ddp=true \
