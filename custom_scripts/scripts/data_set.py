@@ -21,8 +21,8 @@ for j in range(12):
     data_dir_table = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j:03d}/observation.images.table")
     data_dir_wrist = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j:03d}/observation.images.wrist")
 
-    save_data_dir_exo = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j+12:03d}/observation.images.exo")
-    save_data_dir_table = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j+12:03d}/observation.images.table")
+    save_data_dir_exo = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j+12:03d}/observation.images.table")
+    save_data_dir_table = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j+12:03d}/observation.images.exo")
     save_data_dir_wrist = Path(f"/data/piper_grape0626_multiview/lerobot_5hz/videos/chunk-{j+12:03d}/observation.images.wrist")
     for i in range(50):
         global_index = i + 50 * j
