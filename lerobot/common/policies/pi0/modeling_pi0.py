@@ -253,6 +253,34 @@ class PI0Policy(PreTrainedPolicy):
         self.language_tokenizer = AutoTokenizer.from_pretrained("google/paligemma-3b-pt-224")
         self.model = PI0FlowMatching(config)
 
+        # ###################
+        # # --------- Add SimpleMoE for image embeddings ---------
+        # from torch import nn
+        # import torch.nn.functional as F
+        # class SimpleMoE(nn.Module):
+        #     def __init__(self, input_dim, hidden_dim=512, num_experts=4):
+        #         super().__init__()
+        #         self.experts = nn.ModuleList([
+        #             nn.Sequential(
+        #                 nn.Linear(input_dim, hidden_dim),
+        #                 nn.ReLU(),
+        #                 nn.Linear(hidden_dim, input_dim)
+        #             ) for _ in range(num_experts)
+        #         ])
+        #         self.gating = nn.Linear(input_dim, num_experts)
+        #
+        #     def forward(self, x):
+        #         gate_scores = F.softmax(self.gating(x), dim=-1)  # (B, N, E)
+        #         expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=0)  # (E, B, N, D)
+        #         expert_outputs = expert_outputs.permute(1, 2, 0, 3)  # (B, N, E, D)
+        #         return torch.sum(gate_scores.unsqueeze(-1) * expert_outputs, dim=2)  # (B, N, D)
+        # # Assume image embedding dim is 768 for now; adjust if different
+        # self.image_moe = SimpleMoE(input_dim=768)
+        # # Move image_moe to correct device
+        # self.image_moe.to(config.device)
+        # # ------------------------------------------------------
+
+        ###################
         self.reset()
 
     def reset(self):
@@ -483,6 +511,7 @@ class PI0FlowMatching(nn.Module):
             train_expert_only=self.config.train_expert_only,
             attention_implementation=self.config.attention_implementation,
         )
+        #self.paligemma_with_expert = PaliGemmaWithExpertModel(paligemma_with_export_config)
         self.paligemma_with_expert = PaliGemmaWithExpertModel(paligemma_with_export_config)
 
         # Projections are float32

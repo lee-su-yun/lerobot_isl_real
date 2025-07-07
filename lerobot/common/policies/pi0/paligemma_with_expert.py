@@ -16,8 +16,26 @@ from typing import List, Optional, Union
 
 import torch
 import torch.version
+import torch.nn.functional as F
 from pytest import Cache
 from torch import nn
+class SimpleMoE(nn.Module):
+    def __init__(self, input_dim, hidden_dim=512, num_experts=4):
+        super().__init__()
+        self.experts = nn.ModuleList([
+            nn.Sequential(
+                nn.Linear(input_dim, hidden_dim),
+                nn.ReLU(),
+                nn.Linear(hidden_dim, input_dim),
+            ) for _ in range(num_experts)
+        ])
+        self.gating = nn.Linear(input_dim, num_experts)
+
+    def forward(self, x):
+        gate_scores = F.softmax(self.gating(x), dim=-1)
+        expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=0)
+        expert_outputs = expert_outputs.permute(1, 2, 0, 3)
+        return torch.sum(gate_scores.unsqueeze(-1) * expert_outputs, dim=2)
 from transformers import (
     AutoConfig,
     GemmaForCausalLM,
@@ -178,7 +196,21 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         self.gemma_expert = GemmaForCausalLM(config=config.gemma_expert_config)
         # Remove unused embed_tokens
         self.gemma_expert.model.embed_tokens = None
+        #####
 
+
+
+        # Add Mixture-of-Experts (MoE) after multi-modal projector
+        input_dim = self.config.paligemma_config.text_config.hidden_size
+        self.image_moe = SimpleMoE(input_dim=input_dim)
+        proj = self.paligemma.multi_modal_projector.projection
+        for expert in self.image_moe.experts:
+            expert[-1].weight.data.copy_(proj.weight.data.clone())
+            expert[-1].bias.data.copy_(proj.bias.data.clone())
+
+
+
+        #####
         self.to_bfloat16_like_physical_intelligence()
         self.set_requires_grad()
 
@@ -216,7 +248,12 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
                 param.data = param.data.to(dtype=torch.bfloat16)
 
     def embed_image(self, image: torch.Tensor):
-        return self.paligemma.get_image_features(image)
+        image_features = self.paligemma.vision_tower(image).last_hidden_state
+        image_features = self.paligemma.multi_modal_projector(image_features)
+        image_features = self.image_moe(image_features)
+        image_features = image_features / (self.config.paligemma_config.text_config.hidden_size ** 0.5)
+        return image_features
+        #return self.paligemma.get_image_features(image)
 
     def embed_language_tokens(self, tokens: torch.Tensor):
         return self.paligemma.language_model.model.embed_tokens(tokens)
