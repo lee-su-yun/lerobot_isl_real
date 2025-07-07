@@ -201,8 +201,9 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
 
 
         # Add Mixture-of-Experts (MoE) after multi-modal projector
-        input_dim = self.config.paligemma_config.text_config.hidden_size
-        self.image_moe = SimpleMoE(input_dim=input_dim)
+        #input_dim = self.config.paligemma_config.text_config.hidden_size
+        input_dim = 1152
+        self.image_moe = SimpleMoE(input_dim)
         proj = self.paligemma.multi_modal_projector.linear
         for expert in self.image_moe.experts:
             first_linear = expert[0]
