@@ -32,8 +32,6 @@ class SimpleMoE(nn.Module):
         self.gate = nn.Linear(input_dim, num_experts)
 
     def forward(self, x):
-        if x.dtype != torch.float32:
-            x = x.to(torch.float32)
         weights = torch.softmax(self.gate(x), dim=-1)
         expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=-1)
         output = torch.sum(expert_outputs * weights.unsqueeze(-2), dim=-1)
