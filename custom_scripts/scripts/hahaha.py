@@ -499,19 +499,17 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
             tri_points.append((corner_x_rot + rx, corner_y_rot + ry))
 
 
-    elif pattern_index == 4:  # image_d16d9d.png: Horizontal rectangle, triangle pointing left
-        rect_width = common_rect_h  # Swap dimensions for horizontal
-        rect_height = common_rect_w
-        rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
-        rect_angle = 0
 
-        # Triangle: base centered at left of rectangle, pointing left
-        # The base of the triangle should start exactly at rect_coords[0] (left edge of rectangle)
-        tri_points = [
-            (rect_coords[0], center_y_sub - common_tri_base / 2),
-            (rect_coords[0], center_y_sub + common_tri_base / 2),
-            (rect_coords[0] - common_tri_height, center_y_sub)
-        ]
+    elif pattern_index == 4:  # New Pattern: Square with "Rand" text
+        square_size = min(w_sub, h_sub) * 0.7  # Make it a clear square within the sub-area
+        square_coords = (center_x_sub - square_size / 2, center_y_sub - square_size / 2)
+
+        # Draw the square (can be purple or any other color)
+        square_patch = patches.Rectangle(square_coords, square_size, square_size, color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        ax.add_patch(square_patch)
+
+        # Add "Rand" text in the center of the square
+        ax.text(center_x_sub, center_y_sub, "Rand", ha='center', va='center',fontsize=min(w_sub, h_sub) * 0.2, color='white', fontweight='bold')
 
     # Draw the rectangle
     rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
