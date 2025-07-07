@@ -82,7 +82,7 @@ schedule = {
         ],
         "16:00~18:00": [
             {"person": "경훈", "other_object_location": 1, "grape_target_location": 2, "episode_range": (1200, 1219),
-             "other_object_type": "corn"},  # "1 (Corn)"
+             "other_object_type": "corn"},
             {"person": "경훈", "other_object_location": 1, "grape_target_location": 3, "episode_range": (1220, 1239),
              "other_object_type": "corn"},
             {"person": "경훈", "other_object_location": 1, "grape_target_location": 4, "episode_range": (1240, 1259),
@@ -233,7 +233,7 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
     """
     Draws a specific pattern of grapes (rectangle + triangle) within a given sub-area.
     sub_area_coords: (x, y, width, height) of the sub-area.
-    pattern_index: 0 to 4 (representing 5 unique patterns from the provided image).
+    pattern_index: 0 to 4 (representing 5 unique patterns from the provided images).
     """
     x_sub, y_sub, w_sub, h_sub = sub_area_coords
 
@@ -242,164 +242,151 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
     center_y_sub = y_sub + h_sub / 2
 
     # Relative dimensions for the rectangle and triangle within the sub-area
-    rect_width = w_sub * 0.4
-    rect_height = h_sub * 0.7
-    tri_base = rect_width * 0.8
-    tri_height = h_sub * 0.2
+    rect_width_base = w_sub * 0.4
+    rect_height_base = h_sub * 0.7
+    tri_base_len_base = rect_width_base * 0.8
+    tri_height_len_base = h_sub * 0.2
 
-    # Define grape patterns as (rectangle_center_offset_x, rectangle_center_offset_y, rotation_angle_deg, triangle_offset_x, triangle_offset_y, triangle_direction)
-    # The triangle direction dictates where its apex points relative to its base.
-    # Pattern descriptions:
-    # 0: Vertical rectangle, triangle pointing up
-    # 1: 5 Circles in a cluster (as per your previous example, but now pattern 2 in the image) - will approximate with 5 circles
-    # 2: Horizontal rectangle, triangle pointing right
-    # 3: Diagonal rectangle, triangle pointing up-left (rotated -45 deg)
-    # 4: Horizontal rectangle, triangle pointing left, with 'theta' symbol
+    # Pattern definitions: (rect_orientation, tri_orientation)
+    # rect_orientation: 'vertical', 'horizontal', 'diagonal'
+    # tri_orientation: 'up', 'down', 'left', 'right', 'up-right', 'down-left', etc. (relative to pattern center)
 
-    # Let's map these to the 0-4 index
-    # Pattern 0 in image -> Pattern Index 0 (Vertical)
-    # Pattern 1 in image (5 circles) -> Pattern Index 1
-    # Pattern 2 in image (Horizontal right) -> Pattern Index 2
-    # Pattern 3 in image (Diagonal) -> Pattern Index 3
-    # Pattern 4 in image (Horizontal left with theta) -> Pattern Index 4
+    # Let's redefine common rectangle and triangle dimensions for clarity
+    # Rectangle (base size, will be scaled/swapped for orientation)
+    common_rect_w = w_sub * 0.4
+    common_rect_h = h_sub * 0.7
 
-    # Each entry: (rect_center_dx, rect_center_dy, rect_angle, tri_center_dx, tri_center_dy, tri_angle, custom_text)
-    # tri_angle is for the triangle's overall orientation, 0 for pointing up, 90 for right, 180 for down, 270 for left
+    # Triangle (base size, will be scaled/swapped for orientation)
+    common_tri_base = common_rect_w * 0.8
+    common_tri_height = h_sub * 0.2
 
-    # For Pattern 1 (5 circles), we will draw 5 circles.
-    # For others, draw rect + triangle.
+    # Helper function to rotate a point (px, py) around an origin (ox, oy) by an angle (degrees)
+    def rotate_point(px, py, ox, oy, angle_deg):
+        angle_rad = math.radians(angle_deg)
+        qx = ox + math.cos(angle_rad) * (px - ox) - math.sin(angle_rad) * (py - oy)
+        qy = oy + math.sin(angle_rad) * (px - ox) + math.cos(angle_rad) * (py - oy)
+        return qx, qy
 
-    if pattern_index == 1:  # Pattern 1 in image (5 circles, labeled 'Y' with subscript 'i', 't', 's')
-        # This one is a cluster of 5 circles, as in your `image_d1d622.jpg`
-        grape_radius = min(w_sub, h_sub) * 0.1  # Smaller radius for individual grapes
-        ax.add_patch(patches.Circle((center_x_sub, center_y_sub), grape_radius * 1.5, color='purple',
-                                    alpha=0.9))  # Center grape slightly larger
+    # --- Draw specific pattern based on pattern_index ---
+    if pattern_index == 0:  # image_d16de0.png: Vertical rectangle, triangle pointing up
+        rect_width = common_rect_w
+        rect_height = common_rect_h
+        rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
+        rect_angle = 0
 
-        # Surrounding grapes
-        offset_dist = grape_radius * 2
-        ax.add_patch(
-            patches.Circle((center_x_sub - offset_dist, center_y_sub), grape_radius, color='purple', alpha=0.9))
-        ax.add_patch(
-            patches.Circle((center_x_sub + offset_dist, center_y_sub), grape_radius, color='purple', alpha=0.9))
-        ax.add_patch(
-            patches.Circle((center_x_sub, center_y_sub - offset_dist), grape_radius, color='purple', alpha=0.9))
-        ax.add_patch(
-            patches.Circle((center_x_sub, center_y_sub + offset_dist), grape_radius, color='purple', alpha=0.9))
-
-        # Add a small stem-like triangle at the top, slightly offset
-        stem_points = [
-            (center_x_sub, center_y_sub + offset_dist + grape_radius),
-            (center_x_sub - grape_radius * 0.5, center_y_sub + offset_dist + grape_radius + tri_height),
-            (center_x_sub + grape_radius * 0.5, center_y_sub + offset_dist + grape_radius + tri_height)
+        # Triangle: base centered at top of rectangle, pointing up
+        tri_points = [
+            (center_x_sub - common_tri_base / 2, rect_coords[1] + rect_height),
+            (center_x_sub + common_tri_base / 2, rect_coords[1] + rect_height),
+            (center_x_sub, rect_coords[1] + rect_height + common_tri_height)
         ]
-        ax.add_patch(patches.Polygon(stem_points, closed=True, color='green', alpha=0.9))
 
-        # Add text 'Yits' (approximated for plot, cannot render subscripts easily)
-        ax.text(center_x_sub, center_y_sub + h_sub * 0.45, "Yits", ha='center', va='bottom', fontsize=8, color='black')
+    elif pattern_index == 1:  # image_d16dbc.png: Vertical rectangle, triangle pointing down
+        rect_width = common_rect_w
+        rect_height = common_rect_h
+        rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
+        rect_angle = 0
 
-    else:  # Patterns using rectangle and triangle
-        if pattern_index == 0:  # Vertical rectangle, triangle up (from image)
-            rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
-            rect_angle = 0
-            # Triangle points upwards from top center of rectangle
-            tri_points = [
-                (center_x_sub - tri_base / 2, rect_coords[1] + rect_height),
-                (center_x_sub + tri_base / 2, rect_coords[1] + rect_height),
-                (center_x_sub, rect_coords[1] + rect_height + tri_height)
-            ]
-        elif pattern_index == 2:  # Horizontal rectangle, triangle right (from image)
-            rect_width_temp = rect_height  # Swap dimensions
-            rect_height_temp = rect_width
-            rect_coords = (center_x_sub - rect_width_temp / 2, center_y_sub - rect_height_temp / 2)
-            rect_angle = 0  # No explicit rotation needed if coords are adjusted
-            # Triangle points right from right center of rectangle
-            tri_points = [
-                (rect_coords[0] + rect_width_temp, center_y_sub - tri_base / 2),
-                (rect_coords[0] + rect_width_temp, center_y_sub + tri_base / 2),
-                (rect_coords[0] + rect_width_temp + tri_height, center_y_sub)
-            ]
-            rect_width, rect_height = rect_width_temp, rect_height_temp  # Update for drawing
-        elif pattern_index == 3:  # Diagonal rectangle, triangle up-left (from image)
-            rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)  # Start from center
-            rect_angle = -45  # Rotate by -45 degrees
-            # Triangle points up-left relative to the rotated rectangle
-            # This is more complex. Let's make it visually similar by rotating the standard triangle
-            # around the end of the rectangle.
+        # Triangle: base centered at bottom of rectangle, pointing down
+        tri_points = [
+            (center_x_sub - common_tri_base / 2, rect_coords[1]),
+            (center_x_sub + common_tri_base / 2, rect_coords[1]),
+            (center_x_sub, rect_coords[1] - common_tri_height)
+        ]
 
-            # First, place rectangle. Then calculate triangle points relative to rotated rectangle end.
-            # Base of triangle is at the top-left-ish corner of the rotated rectangle.
-            # Rotate rect_coords around center to get the actual bottom-left
+    elif pattern_index == 2:  # image_d16da2.png: Horizontal rectangle, triangle pointing right
+        rect_width = common_rect_h  # Swap dimensions for horizontal
+        rect_height = common_rect_w
+        rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
+        rect_angle = 0
 
-            # Simple approach: draw rectangle, then draw triangle independently based on visual.
-            # This pattern is rotated, so the `Rectangle` patch needs `angle`.
+        # Triangle: base centered at right of rectangle, pointing right
+        tri_points = [
+            (rect_coords[0] + rect_width, center_y_sub - common_tri_base / 2),
+            (rect_coords[0] + rect_width, center_y_sub + common_tri_base / 2),
+            (rect_coords[0] + rect_width + common_tri_height, center_y_sub)
+        ]
 
-            # Calculate rotated rectangle's origin (bottom-left)
-            half_diag = math.sqrt((rect_width / 2) ** 2 + (rect_height / 2) ** 2)
-            angle_offset = math.atan2(rect_height / 2, rect_width / 2)
+    elif pattern_index == 3:  # image_d16d84.png: Diagonal rectangle (-45 deg), triangle pointing top-right
+        rect_width = common_rect_w * 1.0  # Slightly larger for diagonal visual balance
+        rect_height = common_rect_h * 1.0
+        rect_angle = -45  # Rotate clockwise by 45 degrees
 
-            # Rotate bottom-left corner of unrotated rectangle relative to its center
-            bl_x_unrotated = -rect_width / 2
-            bl_y_unrotated = -rect_height / 2
+        # For rotated rectangles, `patches.Rectangle` takes `xy` as bottom-left of unrotated rect
+        # and then rotates it around `rotation_point`. So, calculate origin relative to center.
 
-            bl_x_rotated = bl_x_unrotated * math.cos(math.radians(rect_angle)) - bl_y_unrotated * math.sin(
-                math.radians(rect_angle))
-            bl_y_rotated = bl_x_unrotated * math.sin(math.radians(rect_angle)) + bl_y_unrotated * math.cos(
-                math.radians(rect_angle))
+        # Unrotated bottom-left corner relative to rectangle's center
+        bl_dx_unrotated = -rect_width / 2
+        bl_dy_unrotated = -rect_height / 2
 
-            rect_coords = (center_x_sub + bl_x_rotated, center_y_sub + bl_y_rotated)
+        # Rotate this bottom-left point around (0,0) by `rect_angle`
+        rot_bl_dx = bl_dx_unrotated * math.cos(math.radians(rect_angle)) - bl_dy_unrotated * math.sin(
+            math.radians(rect_angle))
+        rot_bl_dy = bl_dx_unrotated * math.sin(math.radians(rect_angle)) + bl_dy_unrotated * math.cos(
+            math.radians(rect_angle))
 
-            # Triangle's position will be relative to the rotated top-left of the rectangle
-            # Approximate the triangle's position relative to the overall pattern center
-            tri_center_x = center_x_sub - rect_width * 0.3 * math.cos(
-                math.radians(rect_angle)) - rect_height * 0.3 * math.sin(math.radians(rect_angle))
-            tri_center_y = center_y_sub - rect_width * 0.3 * math.sin(
-                math.radians(rect_angle)) + rect_height * 0.3 * math.cos(math.radians(rect_angle))
+        rect_coords = (center_x_sub + rot_bl_dx, center_y_sub + rot_bl_dy)
 
-            # Triangle points: relative to its own center, then rotated
-            tri_base_pts_unrotated = [
-                (-tri_base / 2, 0), (tri_base / 2, 0), (0, tri_height)
-            ]
-            tri_points = []
-            for dx_tri, dy_tri in tri_base_pts_unrotated:
-                # Rotate triangle points around triangle's center by rect_angle + 90 (to point up-left)
-                rot_angle_tri = rect_angle + 90
-                px = dx_tri * math.cos(math.radians(rot_angle_tri)) - dy_tri * math.sin(math.radians(rot_angle_tri))
-                py = dx_tri * math.sin(math.radians(rot_angle_tri)) + dy_tri * math.cos(math.radians(rot_angle_tri))
-                tri_points.append((tri_center_x + px, tri_center_y + py))
+        # Triangle positioning is trickier for rotation.
+        # Let's define it relative to the top-right corner of the rotated rectangle.
+        # Find unrotated top-right point relative to center, then rotate it.
+        tr_dx_unrotated = rect_width / 2
+        tr_dy_unrotated = rect_height / 2
 
-            # Add 'alpha' symbol for pattern 3
-            ax.text(center_x_sub, center_y_sub, r'$\alpha$', ha='center', va='center', fontsize=12, color='white',
-                    rotation=rect_angle)
+        rot_tr_dx = tr_dx_unrotated * math.cos(math.radians(rect_angle)) - tr_dy_unrotated * math.sin(
+            math.radians(rect_angle))
+        rot_tr_dy = tr_dx_unrotated * math.sin(math.radians(rect_angle)) + tr_dy_unrotated * math.cos(
+            math.radians(rect_angle))
 
-        elif pattern_index == 4:  # Horizontal rectangle, triangle left, with 'theta' symbol (from image)
-            rect_width_temp = rect_height  # Swap dimensions
-            rect_height_temp = rect_width
-            rect_coords = (center_x_sub - rect_width_temp / 2, center_y_sub - rect_height_temp / 2)
-            rect_angle = 0
-            # Triangle points left from left center of rectangle
-            tri_points = [
-                (rect_coords[0], center_y_sub - tri_base / 2),
-                (rect_coords[0], center_y_sub + tri_base / 2),
-                (rect_coords[0] - tri_height, center_y_sub)
-            ]
-            rect_width, rect_height = rect_width_temp, rect_height_temp  # Update for drawing
+        # The base of the triangle should be near the top-right of the rectangle
+        tri_base_center_x = center_x_sub + rot_tr_dx
+        tri_base_center_y = center_y_sub + rot_tr_dy
 
-            # Add 'theta' symbol for pattern 4
-            ax.text(center_x_sub, center_y_sub, r'$\theta$', ha='center', va='center', fontsize=12, color='white')
+        # Define triangle points around its own (0,0), then translate and rotate.
+        # Triangle points for 'pointing up' initially:
+        tri_points_unrotated = [
+            (-common_tri_base / 2, 0),
+            (common_tri_base / 2, 0),
+            (0, common_tri_height)
+        ]
 
-        # Draw the rectangle
-        rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
-                                       angle=rect_angle, rotation_point='center',
-                                       color='purple', alpha=0.9)
-        ax.add_patch(rect_patch)
+        tri_points = []
+        # Triangle's rotation should be aligned with the end of the diagonal rectangle.
+        # Visually, it seems to point in the direction of the rectangle's longer axis.
+        # So, rotate triangle by `rect_angle`.
+        tri_rot_angle = rect_angle  # Aligned with rectangle's angle
 
-        # Draw the triangle
-        tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9)
-        ax.add_patch(tri_patch)
+        for px, py in tri_points_unrotated:
+            rx, ry = rotate_point(px, py, 0, 0, tri_rot_angle)
+            tri_points.append((tri_base_center_x + rx, tri_base_center_y + ry))
+
+    elif pattern_index == 4:  # image_d16d9d.png: Horizontal rectangle, triangle pointing left
+        rect_width = common_rect_h  # Swap dimensions for horizontal
+        rect_height = common_rect_w
+        rect_coords = (center_x_sub - rect_width / 2, center_y_sub - rect_height / 2)
+        rect_angle = 0
+
+        # Triangle: base centered at left of rectangle, pointing left
+        tri_points = [
+            (rect_coords[0], center_y_sub - common_tri_base / 2),
+            (rect_coords[0], center_y_sub + common_tri_base / 2),
+            (rect_coords[0] - common_tri_height, center_y_sub)
+        ]
+
+    # Draw the rectangle
+    rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
+                                   angle=rect_angle, rotation_point='center',
+                                   color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+    ax.add_patch(rect_patch)
+
+    # Draw the triangle
+    tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
+    ax.add_patch(tri_patch)
 
 
 def visualize_placement(episode_number):
     found_entry = None
+    # Iterate through the schedule to find the correct entry for the given episode number
     for day, time_slots in schedule.items():
         for time_slot, entries in time_slots.items():
             for entry in entries:
@@ -505,41 +492,27 @@ def visualize_placement(episode_number):
 
 
 # --- 3. Example Usage ---
-# Test with episode 605, which you provided an image for (now pattern 1 in the new image mapping)
-# For episode 605: relative_episode_index = 5. sub_area_index = 1 (TR), grape_orientation_index = 0.
-# So, sub-area 2, Pattern 1 (vertical rectangle).
-visualize_placement(605)
-
-# Example 1: Episode 600 (first in range)
+# Test with episode 600 (first in range)
 # relative_episode_index = 0. sub_area_index = 0 (TL), grape_orientation_index = 0.
-# Expected: Sub-area 1 (TL), Pattern 1 (vertical)
+# Expected: Sub-area 1 (TL), Pattern 1 (vertical up)
 visualize_placement(600)
 
-# Example 2: Episode 601 (second in range)
+# Test with episode 601 (second in range)
 # relative_episode_index = 1. sub_area_index = 0 (TL), grape_orientation_index = 1.
-# Expected: Sub-area 1 (TL), Pattern 2 (5 circles)
+# Expected: Sub-area 1 (TL), Pattern 2 (vertical down)
 visualize_placement(601)
 
-# Example 3: Episode 602 (third in range)
+# Test with episode 602 (third in range)
 # relative_episode_index = 2. sub_area_index = 0 (TL), grape_orientation_index = 2.
-# Expected: Sub-area 1 (TL), Pattern 3 (horizontal, right triangle)
+# Expected: Sub-area 1 (TL), Pattern 3 (horizontal right)
 visualize_placement(602)
 
-# Example 4: Episode 603 (fourth in range)
+# Test with episode 603 (fourth in range)
 # relative_episode_index = 3. sub_area_index = 0 (TL), grape_orientation_index = 3.
 # Expected: Sub-area 1 (TL), Pattern 4 (diagonal)
 visualize_placement(603)
 
-# Example 5: Episode 604 (fifth in range, "random")
+# Test with episode 604 (fifth in range)
 # relative_episode_index = 4. sub_area_index = 0 (TL), grape_orientation_index = 4.
-# Expected: Sub-area 1 (TL), Pattern 5 (horizontal, left triangle with theta)
+# Expected: Sub-area 1 (TL), Pattern 5 (horizontal left)
 visualize_placement(604)
-
-# Example from Thursday (where 'X' is the other object)
-# Episode 1888: 1880-1899. Other object None, Grapes in Area 5.
-# 1888 - 1880 = 8.
-# sub_area_index = 8 // 5 = 1 (Sub-area 2, TR)
-# grape_orientation_index = 8 % 5 = 3 (Pattern 4, diagonal)
-visualize_placement(605)
-visualize_placement(606)
-
