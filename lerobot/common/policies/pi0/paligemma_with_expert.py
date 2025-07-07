@@ -32,6 +32,8 @@ class SimpleMoE(nn.Module):
         self.gate = nn.Linear(input_dim, num_experts)
 
     def forward(self, x):
+        if x.dtype != torch.float32:
+            x = x.to(torch.float32)
         weights = torch.softmax(self.gate(x), dim=-1)
         expert_outputs = torch.stack([expert(x) for expert in self.experts], dim=-1)
         output = torch.sum(expert_outputs * weights.unsqueeze(-2), dim=-1)
@@ -203,7 +205,7 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         # Add Mixture-of-Experts (MoE) after multi-modal projector
         #input_dim = self.config.paligemma_config.text_config.hidden_size
         input_dim = 1152
-        self.image_moe = SimpleMoE(input_dim)
+        self.image_moe = SimpleMoE(input_dim).to(dtype=torch.bfloat16)
         proj = self.paligemma.multi_modal_projector.linear
         for expert in self.image_moe.experts:
             first_linear = expert[0]
