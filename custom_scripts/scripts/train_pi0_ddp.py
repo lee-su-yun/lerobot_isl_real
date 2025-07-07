@@ -100,7 +100,7 @@ def train(cfg: TrainPipelineConfig):
     cfg.validate()
     # Check device is available
     device = get_safe_torch_device(cfg.policy.device, log=True)
-    torch.backends.cudnn.benchmark = True
+    #torch.backends.cudnn.benchmark = True
     torch.backends.cuda.matmul.allow_tf32 = True
 
     if cfg.use_ddp:
