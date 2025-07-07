@@ -633,7 +633,7 @@ def visualize_placement(episode_number):
 # Test with episode 600 (first in range)
 # relative_episode_index = 0. sub_area_index = 0 (TL), grape_orientation_index = 0.
 # Expected: Sub-area 1 (TL), Pattern 1 (vertical up)
-for i in range(1320, 1339):
+for i in range(1000, 1400):
     visualize_placement(i)
 
 
