@@ -207,12 +207,31 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
         input_dim = 1152
         self.image_moe = SimpleMoE(input_dim).to(dtype=torch.bfloat16)
         proj = self.paligemma.multi_modal_projector.linear
+        # for expert in self.image_moe.experts:
+        #     first_linear = expert[0]
+        #     nn.init.eye_(first_linear.weight)  # weight = Identity matrix
+        #     nn.init.zeros_(first_linear.bias)
+        #     expert[-1].weight.data.copy_(proj.weight.data.clone())
+        #     expert[-1].bias.data.copy_(proj.bias.data.clone())
         for expert in self.image_moe.experts:
             first_linear = expert[0]
-            nn.init.eye_(first_linear.weight)  # weight = Identity matrix
-            nn.init.zeros_(first_linear.bias)
-            expert[-1].weight.data.copy_(proj.weight.data.clone())
-            expert[-1].bias.data.copy_(proj.bias.data.clone())
+
+            # Create identity weight in float32
+            eye_weight = torch.eye(input_dim, dtype=torch.float32)
+            if first_linear.weight.shape != eye_weight.shape:
+                raise ValueError(f"Shape mismatch: expected {eye_weight.shape}, got {first_linear.weight.shape}")
+
+            # Convert to same dtype and device as model
+            first_linear.weight.data.copy_(
+                eye_weight.to(dtype=first_linear.weight.dtype, device=first_linear.weight.device))
+            first_linear.bias.data.zero_()
+
+            # Copy projection weight (cast to same dtype if needed)
+            expert[-1].weight.data.copy_(proj.weight.data.to(dtype=expert[-1].weight.dtype))
+            expert[-1].bias.data.copy_(proj.bias.data.to(dtype=expert[-1].bias.dtype))
+
+        # Now convert entire MoE module to bfloat16
+        self.image_moe = self.image_moe.to(dtype=torch.bfloat16)
 
 
 
