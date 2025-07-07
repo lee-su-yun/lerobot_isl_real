@@ -273,11 +273,11 @@ class PaliGemmaWithExpertModel(PreTrainedModel):
 
     def embed_image(self, image: torch.Tensor):
         image_features = self.paligemma.vision_tower(image).last_hidden_state
-        image_features = self.paligemma.multi_modal_projector(image_features)
+    #    image_features = self.paligemma.multi_modal_projector(image_features)
         image_features = self.image_moe(image_features)
         image_features = image_features / (self.config.paligemma_config.text_config.hidden_size ** 0.5)
         return image_features
-        #return self.paligemma.get_image_features(image)
+        return self.paligemma.get_image_features(image)
 
     def embed_language_tokens(self, tokens: torch.Tensor):
         return self.paligemma.language_model.model.embed_tokens(tokens)
