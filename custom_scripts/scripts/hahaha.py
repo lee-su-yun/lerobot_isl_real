@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
-from datetime import datetime
+from datetime import \
+    datetime  # Though not directly used for date/time calculations for plot, it's good practice for date handling.
 
-# --- 1. Schedule Data ---
-# Structure: {day: {time_slot: [{person: str, other_object_location: int, grape_target_location: int, episode_range: (int, int), other_object_type: str}]}}
-# 'X' in Thursday and Friday means the "other_object_type" is not specified, so we'll leave it as None or a generic placeholder.
-
+# --- 1. Schedule Data (remains the same) ---
 schedule = {
     "07.07": {  # Monday
         "12:00~14:00": [
@@ -201,9 +199,7 @@ schedule = {
             {"person": "웅희", "other_object_location": None, "grape_target_location": 6, "episode_range": (2140, 2159),
              "other_object_type": "X"},
         ],
-        "18:00~20:00": [  # This slot is empty in the image, so no data for now
-            # No data
-        ],
+        "18:00~20:00": [],  # This slot is empty in the image, so no data for now
     },
     "07.11": {  # Friday - Placeholder, no data yet in the image for X, Grape, and Episode
         "12:00~14:00": [],
@@ -227,8 +223,8 @@ def get_grid_coords(area_number):
     # Assuming a grid where each cell is 1 unit wide and 1 unit tall
     # Mapping area numbers to grid positions (col, row)
     mapping = {
-        1: (0, 1), 2: (1, 1), 3: (2, 1),  # Top row
-        4: (0, 0), 5: (1, 0), 6: (2, 0)  # Bottom row
+        1: (0, 1), 2: (1, 1), 3: (2, 1),  # Top row (y=1)
+        4: (0, 0), 5: (1, 0), 6: (2, 0)  # Bottom row (y=0)
     }
     col, row = mapping[area_number]
     return col, row, 1, 1  # x, y, width, height
@@ -236,44 +232,41 @@ def get_grid_coords(area_number):
 
 def draw_grape_pattern(ax, sub_area_coords, pattern_index):
     """
-    Draws grapes within a sub-area based on the pattern_index (0-4).
+    Draws a specific pattern of 5 grapes within a given sub-area.
     sub_area_coords: (x, y, width, height) of the sub-area.
+    pattern_index: 0 to 4 (representing 5 unique patterns of 5 grapes).
     """
     x, y, w, h = sub_area_coords
-    center_x = x + w / 2
-    center_y = y + h / 2
-    radius = min(w, h) * 0.15  # Size of individual grape dots
+    grape_radius = min(w, h) * 0.15  # Size of individual grape dots
 
-    if pattern_index == 0:  # Example pattern 1: Central cluster
-        ax.add_patch(patches.Circle((center_x, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x - radius, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x + radius, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, center_y - radius), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, center_y + radius), radius, color='purple', alpha=0.8))
-    elif pattern_index == 1:  # Example pattern 2: Diagonal
-        ax.add_patch(patches.Circle((x + w * 0.2, y + h * 0.2), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.4, y + h * 0.4), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.6, y + h * 0.6), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.8, y + h * 0.8), radius, color='purple', alpha=0.8))
-    elif pattern_index == 2:  # Example pattern 3: Horizontal line
-        ax.add_patch(patches.Circle((x + w * 0.1, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.3, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.5, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.7, center_y), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((x + w * 0.9, center_y), radius, color='purple', alpha=0.8))
-    elif pattern_index == 3:  # Example pattern 4: Vertical line
-        ax.add_patch(patches.Circle((center_x, y + h * 0.1), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, y + h * 0.3), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, y + h * 0.5), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, y + h * 0.7), radius, color='purple', alpha=0.8))
-        ax.add_patch(patches.Circle((center_x, y + h * 0.9), radius, color='purple', alpha=0.8))
-    elif pattern_index == 4:  # Example pattern 5: Random/Scattered
-        np.random.seed(42)  # For reproducibility of "random"
-        for _ in range(5):
-            rand_x = x + np.random.rand() * w
-            rand_y = y + np.random.rand() * h
-            ax.add_patch(patches.Circle((rand_x, rand_y), radius, color='purple', alpha=0.8))
+    # Define grape positions for each pattern relative to the sub-area's bottom-left corner (x, y)
+    # Each list contains (dx, dy) offsets for 5 grapes
+    grape_patterns = [
+        # Pattern 0: Central cluster (like the image provided for episode 605)
+        [(0.5, 0.5), (0.5 - 0.2, 0.5), (0.5 + 0.2, 0.5), (0.5, 0.5 - 0.2), (0.5, 0.5 + 0.2)],
+        # Pattern 1: Diagonal line
+        [(0.2, 0.2), (0.35, 0.35), (0.5, 0.5), (0.65, 0.65), (0.8, 0.8)],
+        # Pattern 2: Vertical line
+        [(0.5, 0.2), (0.5, 0.35), (0.5, 0.5), (0.5, 0.65), (0.5, 0.8)],
+        # Pattern 3: Horizontal line
+        [(0.2, 0.5), (0.35, 0.5), (0.5, 0.5), (0.65, 0.5), (0.8, 0.5)],
+        # Pattern 4: Random scatter
+        [(np.random.rand(), np.random.rand()) for _ in range(5)]  # Generate random for this pattern
+    ]
+
+    # Ensure "random" pattern is consistent for the same input
+    if pattern_index == 4:
+        np.random.seed(int(x * 1000 + y * 1000 + w * 1000 + h * 1000))  # Seed based on sub-area coords
+        grape_positions = [(x + dx * w, y + dy * h) for dx, dy in grape_patterns[pattern_index]]
+    else:
+        grape_positions = [(x + dx * w, y + dy * h) for dx, dy in grape_patterns[pattern_index]]
+
+    for gx, gy in grape_positions:
+        ax.add_patch(patches.Circle((gx, gy), grape_radius, color='purple', alpha=0.9))
+
+    # Add a stem for the grape cluster for better visual resemblance to grapes
+    if pattern_index == 0:  # Only for the central cluster pattern
+        ax.plot([x + w * 0.5, x + w * 0.5 + 0.1], [y + h * 0.5 + 0.2, y + h * 0.5 + 0.3], color='green', linewidth=2)
 
 
 def visualize_placement(episode_number):
@@ -299,9 +292,9 @@ def visualize_placement(episode_number):
     grape_target_location = found_entry["grape_target_location"]
     other_object_type = found_entry["other_object_type"]
     episode_range_start = found_entry["episode_range"][0]
+    person = found_entry["person"]  # Get person's name
 
-    # Calculate grape pattern index
-    # Total 20 patterns: 4 sub-areas * 5 orientations
+    # Calculate grape sub-area and pattern index
     # (episode_number - episode_range_start) gives an index from 0 to 19
     relative_episode_index = episode_number - episode_range_start
     sub_area_index = relative_episode_index // 5  # 0, 1, 2, 3 (for TL, TR, BL, BR)
@@ -320,20 +313,20 @@ def visualize_placement(episode_number):
     if other_object_location is not None:
         obj_x, obj_y, obj_w, obj_h = get_grid_coords(other_object_location)
         if other_object_type == "cabbage":
-            ax.add_patch(patches.Circle((obj_x + obj_w / 2, obj_y + obj_h / 2), obj_w * 0.3, color='green', alpha=0.7,
-                                        label='Cabbage'))
+            ax.add_patch(patches.Circle((obj_x + obj_w / 2, obj_y + obj_h / 2), obj_w * 0.3, color='green', alpha=0.7))
             ax.text(obj_x + obj_w / 2, obj_y + obj_h / 2, "Cabbage", ha='center', va='center', color='white',
-                    fontsize=10)
+                    fontsize=10, fontweight='bold')
         elif other_object_type == "corn":
             ax.add_patch(
                 patches.Rectangle((obj_x + obj_w * 0.3, obj_y + obj_h * 0.2), obj_w * 0.4, obj_h * 0.6, color='gold',
-                                  alpha=0.7, label='Corn'))
-            ax.text(obj_x + obj_w / 2, obj_y + obj_h / 2, "Corn", ha='center', va='center', color='black', fontsize=10)
-        else:  # Generic 'X' or unspecified
+                                  alpha=0.7))
+            ax.text(obj_x + obj_w / 2, obj_y + obj_h / 2, "Corn", ha='center', va='center', color='black', fontsize=10,
+                    fontweight='bold')
+        else:  # Generic 'X' or unspecified (for Thursday/Friday)
             ax.add_patch(
-                patches.Circle((obj_x + obj_w / 2, obj_y + obj_h / 2), obj_w * 0.3, color='lightgray', alpha=0.7,
-                               label='Other Object'))
-            ax.text(obj_x + obj_w / 2, obj_y + obj_h / 2, "X", ha='center', va='center', color='black', fontsize=10)
+                patches.Circle((obj_x + obj_w / 2, obj_y + obj_h / 2), obj_w * 0.3, color='lightgray', alpha=0.7))
+            ax.text(obj_x + obj_w / 2, obj_y + obj_h / 2, "X", ha='center', va='center', color='black', fontsize=10,
+                    fontweight='bold')
 
     # Place the grapes in the target area
     grape_x, grape_y, grape_w, grape_h = get_grid_coords(grape_target_location)
@@ -344,11 +337,12 @@ def visualize_placement(episode_number):
     ax.add_patch(highlight_rect)
 
     # Define sub-area coordinates within the grape target location (TL, TR, BL, BR)
+    # These are 0-indexed: 0=TL, 1=TR, 2=BL, 3=BR
     sub_area_coords_list = [
-        (grape_x, grape_y + grape_h / 2, grape_w / 2, grape_h / 2),  # Top-Left
-        (grape_x + grape_w / 2, grape_y + grape_h / 2, grape_w / 2, grape_h / 2),  # Top-Right
-        (grape_x, grape_y, grape_w / 2, grape_h / 2),  # Bottom-Left
-        (grape_x + grape_w / 2, grape_y, grape_w / 2, grape_h / 2)  # Bottom-Right
+        (grape_x, grape_y + grape_h / 2, grape_w / 2, grape_h / 2),  # Top-Left (Sub-area 1)
+        (grape_x + grape_w / 2, grape_y + grape_h / 2, grape_w / 2, grape_h / 2),  # Top-Right (Sub-area 2)
+        (grape_x, grape_y, grape_w / 2, grape_h / 2),  # Bottom-Left (Sub-area 3)
+        (grape_x + grape_w / 2, grape_y, grape_w / 2, grape_h / 2)  # Bottom-Right (Sub-area 4)
     ]
 
     # Draw the sub-grid lines for the target grape area
@@ -361,8 +355,18 @@ def visualize_placement(episode_number):
     draw_grape_pattern(ax, sub_area_coords_list[sub_area_index], grape_orientation_index)
 
     # Add labels for sub-areas (optional, for debugging/clarity)
-    # for i, (sx, sy, sw, sh) in enumerate(sub_area_coords_list):
-    #     ax.text(sx + sw/2, sy + sh/2, f'S{i+1}', ha='center', va='center', fontsize=8, color='blue', alpha=0.5)
+    for i, (sx, sy, sw, sh) in enumerate(sub_area_coords_list):
+        ax.text(sx + sw / 2, sy + sh / 2, f'', ha='center', va='center', fontsize=8, color='blue',
+                alpha=0.0)  # Hide by default
+
+    # Add actual sub-area numbers at the corners for clarity as per the example image
+    ax.text(grape_x + grape_w / 4, grape_y + grape_h * 3 / 4, "1", ha='center', va='center', fontsize=10,
+            color='darkred')
+    ax.text(grape_x + grape_w * 3 / 4, grape_y + grape_h * 3 / 4, "2", ha='center', va='center', fontsize=10,
+            color='darkred')
+    ax.text(grape_x + grape_w / 4, grape_y + grape_h / 4, "3", ha='center', va='center', fontsize=10, color='darkred')
+    ax.text(grape_x + grape_w * 3 / 4, grape_y + grape_h / 4, "4", ha='center', va='center', fontsize=10,
+            color='darkred')
 
     ax.set_xlim(-0.5, 3.5)  # 3 columns wide
     ax.set_ylim(-0.5, 2.5)  # 2 rows tall
@@ -370,20 +374,14 @@ def visualize_placement(episode_number):
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_title(
-        f"Episode {episode_number} Placement\nDay: {current_day}, Time: {current_time_slot}, Person: {found_entry['person']}\nOther Object in Area {other_object_location}, Grapes in Area {grape_target_location} (Sub-area {sub_area_index + 1}, Pattern {grape_orientation_index + 1})")
+        f"Episode {episode_number} Placement\nDay: {current_day}, Time: {current_time_slot}, Person: {person}\n"
+        f"Other Object in Area {other_object_location if other_object_location else 'None'}, Grapes in Area {grape_target_location} (Sub-area {sub_area_index + 1}, Pattern {grape_orientation_index + 1})")
     plt.grid(False)
     plt.show()
 
 
 # --- 3. Example Usage ---
-# You can test with any episode number from your schedule.
-# For example, let's try an episode from Monday, 12:00~14:00, Grape Target 2, which is 600-619.
-# Let's pick episode 605.
-# 605 - 600 = 5.
-# sub_area_index = 5 // 5 = 1 (meaning the second sub-area, Top-Right)
-# grape_orientation_index = 5 % 5 = 0 (meaning the first grape pattern)
-
-# Example 1: Episode from Monday 07.07, 12:00~14:00, Grape Target 2
-# Episode range: 600-619. Other object in Area 1, Grapes in Area 2.
-# Let's try episode 605. (index 5) -> sub-area 1 (TR), pattern 0
+# Test with episode 605, which you provided an image for.
+# Expected: Other Object in Area 1 (Cabbage), Grapes in Area 2 (Sub-area 2, Pattern 1)
 visualize_placement(605)
+
