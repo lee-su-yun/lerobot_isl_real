@@ -235,7 +235,7 @@ def get_grid_coords(area_number):
 
 def draw_grape_pattern(ax, sub_area_coords, pattern_index):
     """
-    Draws a specific pattern of grapes (rectangle + triangle) within a given sub-area.
+    Draws a specific pattern of grapes within a given sub-area.
     sub_area_coords: (x, y, width, height) of the sub-area.
     pattern_index: 0 to 4 (representing 5 unique patterns from the provided images).
     """
@@ -273,6 +273,14 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
             (center_x_sub, rect_coords[1] + rect_height + common_tri_height)
         ]
 
+        # Draw the rectangle and triangle for pattern 0
+        rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
+                                       angle=rect_angle, rotation_point='center',
+                                       color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        ax.add_patch(rect_patch)
+        tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
+        ax.add_patch(tri_patch)
+
     elif pattern_index == 1:  # image_d16dbc.png: Vertical rectangle, triangle pointing down
         rect_width = common_rect_w
         rect_height = common_rect_h
@@ -285,6 +293,14 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
             (center_x_sub + common_tri_base / 2, rect_coords[1]),
             (center_x_sub, rect_coords[1] - common_tri_height)
         ]
+
+        # Draw the rectangle and triangle for pattern 1
+        rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
+                                       angle=rect_angle, rotation_point='center',
+                                       color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        ax.add_patch(rect_patch)
+        tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
+        ax.add_patch(tri_patch)
 
     elif pattern_index == 2:  # image_d16da2.png: Horizontal rectangle, triangle pointing right
         rect_width = common_rect_h  # Swap dimensions for horizontal
@@ -299,19 +315,22 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
             (rect_coords[0] + rect_width + common_tri_height, center_y_sub)
         ]
 
+        # Draw the rectangle and triangle for pattern 2
+        rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
+                                       angle=rect_angle, rotation_point='center',
+                                       color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        ax.add_patch(rect_patch)
+        tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
+        ax.add_patch(tri_patch)
+
     elif pattern_index == 3:  # image_d16d84.png: Diagonal rectangle (-45 deg), triangle pointing top-right
-        rect_width = common_rect_w * 1.0  # Slightly larger for diagonal visual balance
+        rect_width = common_rect_w * 1.0
         rect_height = common_rect_h * 1.0
-        rect_angle = -45  # Rotate clockwise by 45 degrees
+        rect_angle = -45
 
-        # For rotated rectangles, `patches.Rectangle` takes `xy` as bottom-left of unrotated rect
-        # and then rotates it around `rotation_point`. So, calculate origin relative to center.
-
-        # Unrotated bottom-left corner relative to rectangle's center
         bl_dx_unrotated = -rect_width / 2
         bl_dy_unrotated = -rect_height / 2
 
-        # Rotate this bottom-left point around (0,0) by `rect_angle`
         rot_bl_dx = bl_dx_unrotated * math.cos(math.radians(rect_angle)) - bl_dy_unrotated * math.sin(
             math.radians(rect_angle))
         rot_bl_dy = bl_dx_unrotated * math.sin(math.radians(rect_angle)) + bl_dy_unrotated * math.cos(
@@ -319,172 +338,13 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
 
         rect_coords = (center_x_sub + rot_bl_dx, center_y_sub + rot_bl_dy)
 
-        # Triangle positioning is trickier for rotation.
-        # Let's define it relative to the top-right corner of the rotated rectangle.
-        # Find unrotated top-right point relative to center, then rotate it.
-        tr_dx_unrotated = rect_width / 2
-        tr_dy_unrotated = rect_height / 2
-
-        rot_tr_dx = tr_dx_unrotated * math.cos(math.radians(rect_angle)) - tr_dy_unrotated * math.sin(
-            math.radians(rect_angle))
-        rot_tr_dy = tr_dx_unrotated * math.sin(math.radians(rect_angle)) + tr_dy_unrotated * math.cos(
-            math.radians(rect_angle))
-
-        # The base of the triangle should be near the top-right of the rectangle
-        tri_base_center_x = center_x_sub + rot_tr_dx
-        tri_base_center_y = center_y_sub + rot_tr_dy
-
-        # Define triangle points around its own (0,0), then translate and rotate.
-        # Triangle points for 'pointing up' initially:
-        tri_points_unrotated = [
-            (-common_tri_base / 2, 0),
-            (common_tri_base / 2, 0),
-            (0, common_tri_height)
-        ]
-
-        tri_points = []
-        # Triangle's rotation should be aligned with the end of the diagonal rectangle.
-        # So, rotate triangle by `rect_angle`. The image shows it pointing outwards from the end.
-        # Adjust angle to point perpendicular to the rectangle's end face for better visual match.
-        tri_rot_angle = rect_angle + 90  # Pointing "up" relative to the rotated rectangle's top edge.
-
-        # Adjust position slightly to be connected to the end of the rectangle
-        # Calculate the actual top-right point of the rotated rectangle.
-        end_point_x = center_x_sub + rect_width / 2 * math.cos(math.radians(rect_angle)) - rect_height / 2 * math.sin(
-            math.radians(rect_angle))
-        end_point_y = center_y_sub + rect_width / 2 * math.sin(math.radians(rect_angle)) + rect_height / 2 * math.cos(
-            math.radians(rect_angle))
-
-        # We need the other end point of the rectangle's long side
-        # To get the top-right point of the rotated rectangle in its own coordinate system
-        # (rect_width / 2, rect_height / 2) relative to its center.
-        # But we need the corner that the triangle is attached to in the image.
-        # This is the top-right corner if the rectangle was unrotated.
-        rotated_corner_x = center_x_sub + (
-                    rect_width / 2 * math.cos(math.radians(rect_angle)) - rect_height / 2 * math.sin(
-                math.radians(rect_angle)))
-        rotated_corner_y = center_y_sub + (
-                    rect_width / 2 * math.sin(math.radians(rect_angle)) + rect_height / 2 * math.cos(
-                math.radians(rect_angle)))
-
-        # Position triangle base at this corner, then offset it by common_tri_height in its own direction
-        # Correctly position the triangle
-        # The base of the triangle should be at the "end" of the diagonal rectangle.
-        # For a -45 degree rectangle, the "top-right" is where the triangle is attached.
-        # Let's use `rotated_corner_x` and `rotated_corner_y` as the starting point for the triangle's base center.
-
-        # The triangle should be positioned such that its base is aligned with the rotated end of the rectangle.
-        # The exact attachment point depends on how the reference image interprets it.
-        # From image_d16d84.png, it seems the triangle's base is perpendicular to the rectangle's end.
-
-        # Let's define the triangle's base center directly from the rectangle's end
-        # The rectangle's 'top-right' if unrotated, then rotated by `rect_angle`.
-        tri_attach_x_unrotated = rect_width / 2
-        tri_attach_y_unrotated = rect_height / 2
-
-        tri_attach_x = center_x_sub + (
-                    tri_attach_x_unrotated * math.cos(math.radians(rect_angle)) - tri_attach_y_unrotated * math.sin(
-                math.radians(rect_angle)))
-        tri_attach_y = center_y_sub + (
-                    tri_attach_x_unrotated * math.sin(math.radians(rect_angle)) + tri_attach_y_unrotated * math.cos(
-                math.radians(rect_angle)))
-
-        # Now, define the triangle's points relative to `(0,0)` then translate and rotate.
-        # The triangle points "outwards" from this attachment point.
-        # Its "up" direction should be along the rotated rectangle's longer axis (pointing away from center).
-        # Its base should be perpendicular to this.
-
-        # Let's try defining the triangle points directly relative to `tri_attach_x, tri_attach_y`
-        # and then apply the rotation.
-        # Triangle orientation (pointing along the long axis of the rectangle)
-        # For -45 deg rectangle, this means the triangle points towards (top-right).
-        tri_points_raw = [
-            (-common_tri_base / 2, 0),
-            (common_tri_base / 2, 0),
-            (0, common_tri_height)
-        ]
-
-        # Rotate triangle to point along the direction of the top-right end of the rectangle.
-        # The triangle in the image is pointing roughly "up-right".
-        # If rect_angle is -45, then this direction is -45 degrees. So tri_rot_angle = -45.
-        # But for 'pointing up' from the 'base' in `tri_points_raw`, we actually want to point
-        # the apex of the triangle in the direction of the rectangle's positive x-axis if unrotated,
-        # then rotate that by rect_angle. So, triangle's angle should be rect_angle.
-
-        tri_rot_angle = rect_angle  # Pointing along the rectangle's direction
-
-        tri_points = []
-        for px, py in tri_points_raw:
-            # Rotate points around (0,0) by tri_rot_angle
-            rx, ry = rotate_point(px, py, 0, 0, tri_rot_angle)
-            # Translate to the attachment point.
-            # The attachment point is the 'center' of the base of the triangle.
-            tri_points.append((tri_attach_x + rx, tri_attach_y + ry))
-
-        # Shift the triangle slightly so its base is exactly at the rectangle's end.
-        # The apex of the triangle in tri_points_raw is at (0, common_tri_height).
-        # Its base is at y=0. We want the base to be at the rectangle's edge.
-        # The '0' y-coordinate of the raw triangle points needs to align with the rectangle's edge.
-
-        # Recalculate tri_points, making the base attach to the rotated_corner.
-        # The triangle's base should be perpendicular to the rectangle's long axis.
-        # So its angle should be rect_angle + 90 degrees.
-        tri_rot_angle = rect_angle + 90
-
-        tri_points_final = []
-        # The base is from (-common_tri_base / 2, 0) to (common_tri_base / 2, 0)
-        # The apex is at (0, common_tri_height)
-
-        # Calculate the center of the base of the triangle, which should be on the rectangle's end.
-        # From the image, the triangle's base seems to be centered on the rotated top-right edge.
-        # The edge extends from the rotated (x+w/2, y-h/2) to (x+w/2, y+h/2) (unrotated terms)
-
-        # For simplicity, let's find the middle of the 'top' edge of the unrotated rectangle
-        # then rotate it, and attach the triangle's base there.
-        # The end where the triangle attaches is the (rect_width/2, rect_height/2) point relative to its center.
-        # In the original image for pattern 3 (image_d16d84.png), the triangle is attached to the upper right end of the diagonal rectangle.
-        # Its base is perpendicular to the rectangle's direction.
-
-        # Let's approximate the attachment point as `(center_x_sub + rot_tr_dx, center_y_sub + rot_tr_dy)`
-        # This point is on the rectangle's perimeter.
-
-        # Adjust the base of the triangle to be at this point, pointing outwards.
-        # `tri_base_len_base` and `tri_height_len_base` are correct.
-
-        # The actual rotated top-right corner of the rectangle
+        # Calculate the actual rotated top-right corner of the rectangle
         corner_x_rot = center_x_sub + rect_width / 2 * math.cos(math.radians(rect_angle)) - rect_height / 2 * math.sin(
             math.radians(rect_angle))
         corner_y_rot = center_y_sub + rect_width / 2 * math.sin(math.radians(rect_angle)) + rect_height / 2 * math.cos(
             math.radians(rect_angle))
 
-        # Define the three points of the triangle relative to its base center (0,0), then rotate and translate
-        # The triangle should point away from the rectangle, along its diagonal axis.
-        # So, the rotation of the triangle is the same as the rectangle.
-        tri_rot_angle = rect_angle
-
-        # Start from the end of the rectangle. The triangle should 'grow' from there.
-        # The base of the triangle should be positioned such that it's flush with the rectangle's end.
-        # The 'base center' of the triangle's raw definition (0,0) needs to be at the rectangle's rotated corner.
-
-        # We want the triangle's apex to point away from the rectangle.
-        # If the rectangle is rotated -45, its "top-right" end is indeed going up-right.
-        # So the triangle's 'up' direction should be along that same angle.
-
-        # The original calculation for tri_attach_x, tri_attach_y was effectively the center of the edge.
-        # Now, shift the triangle so its base (y=0 in its own frame) aligns with this point.
-        # The actual rotation for the triangle itself needs to be considered.
-
-        # Re-evaluating Pattern 3 from image_d16d84.png:
-        # The rectangle is rotated -45 degrees. The triangle is attached to its top-right end.
-        # The triangle's base is perpendicular to the rectangle's long axis.
-        # So, the triangle itself should be rotated (rect_angle + 90) or (rect_angle - 90).
-        # From the image, it looks like `rect_angle + 90` is correct for the triangle's overall orientation.
-        tri_rot_angle = rect_angle + 90
-
-        # The base center of the triangle should be exactly at `corner_x_rot, corner_y_rot`.
-        # The triangle points relative to its base: (-b/2,0), (b/2,0), (0,h).
-        # When rotated, the point (0,0) is the center of the base.
-        # So, just set the center of the triangle's base to the rotated corner.
+        tri_rot_angle = rect_angle + 90  # Triangle's base is perpendicular to rectangle's end
 
         tri_points_relative = [
             (-common_tri_base / 2, 0),
@@ -494,10 +354,16 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
 
         tri_points = []
         for px, py in tri_points_relative:
-            # Rotate these points around (0,0) and then translate them
             rx, ry = rotate_point(px, py, 0, 0, tri_rot_angle)
             tri_points.append((corner_x_rot + rx, corner_y_rot + ry))
 
+        # Draw the rectangle and triangle for pattern 3
+        rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
+                                       angle=rect_angle, rotation_point='center',
+                                       color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        ax.add_patch(rect_patch)
+        tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
+        ax.add_patch(tri_patch)
 
 
     elif pattern_index == 4:  # New Pattern: Square with "Rand" text
@@ -505,21 +371,13 @@ def draw_grape_pattern(ax, sub_area_coords, pattern_index):
         square_coords = (center_x_sub - square_size / 2, center_y_sub - square_size / 2)
 
         # Draw the square (can be purple or any other color)
-        square_patch = patches.Rectangle(square_coords, square_size, square_size, color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
+        square_patch = patches.Rectangle(square_coords, square_size, square_size,
+                                         color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
         ax.add_patch(square_patch)
 
         # Add "Rand" text in the center of the square
-        ax.text(center_x_sub, center_y_sub, "Rand", ha='center', va='center',fontsize=min(w_sub, h_sub) * 0.2, color='white', fontweight='bold')
-
-    # Draw the rectangle
-    rect_patch = patches.Rectangle(rect_coords, rect_width, rect_height,
-                                   angle=rect_angle, rotation_point='center',
-                                   color='purple', alpha=0.9, edgecolor='purple', linewidth=1.5)
-    ax.add_patch(rect_patch)
-
-    # Draw the triangle
-    tri_patch = patches.Polygon(tri_points, closed=True, color='green', alpha=0.9, edgecolor='green', linewidth=1.5)
-    ax.add_patch(tri_patch)
+        ax.text(center_x_sub, center_y_sub, "Rand", ha='center', va='center',
+                fontsize=min(w_sub, h_sub) * 0.2, color='white', fontweight='bold')
 
 
 def visualize_placement(episode_number):
