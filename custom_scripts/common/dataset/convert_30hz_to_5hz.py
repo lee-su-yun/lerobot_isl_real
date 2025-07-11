@@ -81,5 +81,5 @@ def convert_30hz_to_5hz(index):
 
 if __name__ == "__main__":
     #for i in tqdm(range(5)):
-    for i in tqdm(range(2159)):
+    for i in [2159]:
         convert_30hz_to_5hz(i)
