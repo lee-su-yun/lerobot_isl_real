@@ -765,7 +765,7 @@ class LeRobotDataset(torch.utils.data.Dataset):
         elif item["observation.images.wrist"].ndim == 4:
             item["task"] = "Predict the previous state with first two images and " + self.meta.tasks[task_idx]
         else:
-            raise ValueError(f"Unsupported image shape: {imgs.shape}")
+            raise ValueError(f"Unsupported image shape: {item["observation.images.wrist"].shape}")
 
 
 
