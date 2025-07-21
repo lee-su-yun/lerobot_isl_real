@@ -18,7 +18,12 @@ from pprint import pformat
 
 import torch
 
-from lerobot.common.datasets.lerobot_dataset import (
+# from lerobot.common.datasets.lerobot_dataset import (
+#     LeRobotDataset,
+#     LeRobotDatasetMetadata,
+#     MultiLeRobotDataset,
+# )
+from lerobot.common.datasets.lerobot_dataset_modify import (
     LeRobotDataset,
     LeRobotDatasetMetadata,
     MultiLeRobotDataset,
