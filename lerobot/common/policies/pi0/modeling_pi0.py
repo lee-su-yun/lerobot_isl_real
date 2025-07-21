@@ -406,8 +406,8 @@ class PI0Policy(PreTrainedPolicy):
         #     img_masks.append(mask)
         for key in present_img_keys:
             imgs = batch[key]
-            for i in range(2):
-                img = imgs[:, i]
+            if imgs.ndim == 4:
+                img = imgs
 
                 if self.config.resize_imgs_with_padding is not None:
                     img = resize_with_pad(img, *self.config.resize_imgs_with_padding, pad_value=0)
@@ -420,6 +420,24 @@ class PI0Policy(PreTrainedPolicy):
                 mask = torch.ones(bsize, dtype=torch.bool, device=device)
                 images.append(img)
                 img_masks.append(mask)
+            elif imgs.ndim == 5:
+                _, N = imgs.shape[:2]
+                for i in range(N):
+                    img = imgs[:, i]
+
+                    if self.config.resize_imgs_with_padding is not None:
+                        img = resize_with_pad(img, *self.config.resize_imgs_with_padding, pad_value=0)
+
+                    # Normalize from range [0,1] to [-1,1] as expacted by siglip
+                    img = img * 2.0 - 1.0
+
+                    bsize = img.shape[0]
+                    device = img.device
+                    mask = torch.ones(bsize, dtype=torch.bool, device=device)
+                    images.append(img)
+                    img_masks.append(mask)
+            else:
+                raise ValueError(f"Unsupported image shape: {imgs.shape}")
 
         # Create image features not present in the batch
         # as fully 0 padded images.
