@@ -665,13 +665,23 @@ class LeRobotDataset(torch.utils.data.Dataset):
     def _get_query_indices(self, idx: int, ep_idx: int) -> tuple[dict[str, list[int | bool]]]:
         ep_start = self.episode_data_index["from"][ep_idx]
         ep_end = self.episode_data_index["to"][ep_idx]
+        # query_indices = {
+        #     key: [max(ep_start.item(), min(ep_end.item() - 1, idx + delta)) for delta in delta_idx]
+        #     for key, delta_idx in self.delta_indices.items()
+        # }
         query_indices = {
-            key: [max(ep_start.item(), min(ep_end.item() - 1, idx + delta)) for delta in delta_idx]
+            key: [max(ep_start.item(), min(ep_end.item() - 1, idx + delta-1)) for delta in delta_idx]
             for key, delta_idx in self.delta_indices.items()
         }
+        # padding = {  # Pad values outside of current episode range
+        #     f"{key}_is_pad": torch.BoolTensor(
+        #         [(idx + delta < ep_start.item()) | (idx + delta >= ep_end.item()) for delta in delta_idx]
+        #     )
+        #     for key, delta_idx in self.delta_indices.items()
+        # }
         padding = {  # Pad values outside of current episode range
             f"{key}_is_pad": torch.BoolTensor(
-                [(idx + delta < ep_start.item()) | (idx + delta >= ep_end.item()) for delta in delta_idx]
+                [(idx + delta < ep_start.item()) | (idx + delta-1 >= ep_end.item()) for delta in delta_idx]
             )
             for key, delta_idx in self.delta_indices.items()
         }
@@ -687,8 +697,12 @@ class LeRobotDataset(torch.utils.data.Dataset):
             if query_indices is not None and key in query_indices:
                 timestamps = self.hf_dataset.select(query_indices[key])["timestamp"]
                 query_timestamps[key] = torch.stack(timestamps).tolist()
+            # else:
+            #     query_timestamps[key] = [current_ts]
+            elif current_ts-1<0:
+                query_timestamps[key] = [current_ts,current_ts]
             else:
-                query_timestamps[key] = [current_ts]
+                query_timestamps[key] = [current_ts-1/(self.fps), current_ts]
 
         return query_timestamps
 
