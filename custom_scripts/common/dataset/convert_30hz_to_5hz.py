@@ -37,22 +37,22 @@ def convert_30hz_to_5hz(index):
     # old_chunk_id = chunk_id + 6
 
     #####
-    parquet_file_path = f"/data/piper_grape0711/lerobot/data/chunk-{index//50:03d}/episode_{index:06d}.parquet"
-    parquet_file_path_des = f"/data/piper_grape0711/lerobot_5hz/data/chunk-{index//50:03d}/episode_{index:06d}.parquet"
+    parquet_file_path = f"/data/piper_corn_grape_0717/lerobot/data/chunk-055/episode_002759.parquet"
+    parquet_file_path_des = f"/data/piper_corn_grape_0717/lerobot_5hz_re/data/chunk-023/episode_001199.parquet"
 
-    exo_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.exo/episode_{index:06d}.mp4"
-    exo_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    # exo_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.exo/episode_{index:06d}.mp4"
+    # exo_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.exo/episode_{index:06d}.mp4"
 
-    wrist_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.wrist/episode_{index:06d}.mp4"
-    wrist_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.wrist/episode_{index:06d}.mp4"
+    # wrist_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.wrist/episode_{index:06d}.mp4"
+    # wrist_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.wrist/episode_{index:06d}.mp4"
 
-    table_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
-    table_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
+    # table_video_file_path = f"/data/piper_grape0711/lerobot/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
+    # table_video_file_path_des = f"/data/piper_grape0711/lerobot_5hz/videos/chunk-{index//50:03d}/observation.images.table/episode_{index:06d}.mp4"
 
     os.makedirs(os.path.dirname(parquet_file_path_des), exist_ok=True)
-    os.makedirs(os.path.dirname(exo_video_file_path_des), exist_ok=True)
-    os.makedirs(os.path.dirname(wrist_video_file_path_des), exist_ok=True)
-    os.makedirs(os.path.dirname(table_video_file_path_des), exist_ok=True)
+    # os.makedirs(os.path.dirname(exo_video_file_path_des), exist_ok=True)
+    # os.makedirs(os.path.dirname(wrist_video_file_path_des), exist_ok=True)
+    # os.makedirs(os.path.dirname(table_video_file_path_des), exist_ok=True)
 
     dataset = load_dataset("parquet", data_files=parquet_file_path)['train']
     features = Features({
@@ -74,12 +74,12 @@ def convert_30hz_to_5hz(index):
     sampled_dataset = dataset.select(range(0, len(dataset), 6))
     sampled_dataset.to_parquet(parquet_file_path_des)
 
-    cvt_vid(exo_video_file_path, exo_video_file_path_des)
-    cvt_vid(wrist_video_file_path, wrist_video_file_path_des)
-    cvt_vid(table_video_file_path, table_video_file_path_des)
+    # cvt_vid(exo_video_file_path, exo_video_file_path_des)
+    # cvt_vid(wrist_video_file_path, wrist_video_file_path_des)
+    # cvt_vid(table_video_file_path, table_video_file_path_des)
 
 
 if __name__ == "__main__":
     #for i in tqdm(range(5)):
-    for i in [2159]:
+    for i in [1200]:
         convert_30hz_to_5hz(i)

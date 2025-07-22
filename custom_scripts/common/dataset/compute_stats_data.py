@@ -4,7 +4,7 @@ from glob import glob
 import numpy as np
 
 # 기준 경로 설정
-base_dir = "/data/piper_grape0711_80/data"  # 여기에 chunk000~chunk009이 있는 상위 디렉토리 경로를 입력하세요
+base_dir = "/data/piper_corn_grape_0717/lerobot_5hz_re/data"  # 여기에 chunk000~chunk009이 있는 상위 디렉토리 경로를 입력하세요
 
 # 누적 데이터프레임 리스트
 all_data = []
@@ -16,18 +16,18 @@ stats = {col: {} for col in columns}
 dfs = []
 
 # 모든 parquet 파일 읽기
-for chunk_id in range(35):
+for chunk_id in range(24):
     chunk_path = os.path.join(base_dir, f"chunk-{chunk_id:03d}")
-    if chunk_id == 34:
-        for ep_id in range(27):
-            file_path = os.path.join(chunk_path, f"episode_{chunk_id * 50 + ep_id:06d}.parquet")
-            df = pd.read_parquet(file_path)
-            dfs.append(df)
-    else:
-        for ep_id in range(50):
-            file_path = os.path.join(chunk_path, f"episode_{chunk_id * 50 + ep_id:06d}.parquet")
-            df = pd.read_parquet(file_path)
-            dfs.append(df)
+    # if chunk_id == 34:
+    #     for ep_id in range(27):
+    #         file_path = os.path.join(chunk_path, f"episode_{chunk_id * 50 + ep_id:06d}.parquet")
+    #         df = pd.read_parquet(file_path)
+    #         dfs.append(df)
+    # else:
+    for ep_id in range(50):
+        file_path = os.path.join(chunk_path, f"episode_{chunk_id * 50 + ep_id:06d}.parquet")
+        df = pd.read_parquet(file_path)
+        dfs.append(df)
 
 # 전체 결합
 full_df = pd.concat(dfs, ignore_index=True)
