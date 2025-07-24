@@ -65,8 +65,9 @@ def get_stats(base_dir,camera):
 
 
 if __name__=='__main__':
-    base_dir = "/data/piper_grape0711_10/videos/"
+    base_dir = "/data/piper_grape0724/lerobot_5hz/videos/"
     cameras = ["table", "wrist"]
+   # cameras = ["exo"]
 
     for camera in cameras:
         stats = get_stats(base_dir, camera)
