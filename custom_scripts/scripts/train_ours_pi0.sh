@@ -8,8 +8,8 @@ CUDA_VISIBLE_DEVICES=${DEVICES} \
     ./train_pi0_ddp.py \
     --policy.path=/ckpt/pi0 \
     --use_ddp=true \
-    --dataset.repo_id=/data/piper_grape_0724/lerobot_5hz \
-    --dataset.root=/data/piper_grape_0724/lerobot_5hz \
+    --dataset.repo_id=/data/piper_grape0724/lerobot_5hz \
+    --dataset.root=/data/piper_grape0724/lerobot_5hz \
     --wandb.enable=true \
     --output_dir=/result/pi0_20250724_piper_pickgrape_with_corn_ep600 \
     --job_name=pi0_20250724_piper_pickgrape_with_corn_ep600 \
