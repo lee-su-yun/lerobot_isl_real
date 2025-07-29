@@ -114,6 +114,7 @@ def train(cfg: TrainPipelineConfig):
         torch.cuda.set_device(device)  # needed!
         print(f"Local Rank ({local_rank}) Initialized for DDP")
     cfg.policy.device = str(device)
+    cfg.policy.freeze_vision_encoder = True
     logging.info(pformat(cfg.to_dict()))
 
     if cfg.seed is not None:
