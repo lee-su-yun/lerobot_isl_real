@@ -77,12 +77,16 @@ def eval_main(cfg: EvalOursPipelineConfig):
     train_dataset_meta = LeRobotDatasetMetadata(
         cfg.train_dataset.repo_id, cfg.train_dataset.root, revision=cfg.train_dataset.revision
     )
-    dataset = make_dataset(cfg)
-    # x = dataset[0]['observation.images.exo']
+
 
     logging.info("Making policy.")
 
-    policy = make_policy(
+    policy1 = make_policy(
+        cfg=cfg.policy,
+        ds_meta=train_dataset_meta,
+    )
+    cfg.policy.path="/result/pi0_full_openthepot"
+    policy2 = make_policy(
         cfg=cfg.policy,
         ds_meta=train_dataset_meta,
     )
